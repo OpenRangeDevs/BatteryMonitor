@@ -13,15 +13,23 @@ class BatteryMonitor: ObservableObject {
   }
   
   init() {
-    lowBatteryThreshold = UserDefaults.standard.integer(forKey: "LowBatteryThreshold")
-    highBatteryThreshold = UserDefaults.standard.integer(forKey: "HighBatteryThreshold")
-    if lowBatteryThreshold == 0 { lowBatteryThreshold = 10 }
-    if highBatteryThreshold == 0 { highBatteryThreshold = 85 }
-    
+    loadSavedThresholds()
     updateBatteryLevel()
     Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { _ in
       self.updateBatteryLevel()
     }
+  }
+  
+  func loadSavedThresholds() {
+    lowBatteryThreshold = UserDefaults.standard.integer(forKey: "LowBatteryThreshold")
+    highBatteryThreshold = UserDefaults.standard.integer(forKey: "HighBatteryThreshold")
+    if lowBatteryThreshold == 0 { lowBatteryThreshold = 10 }
+    if highBatteryThreshold == 0 { highBatteryThreshold = 85 }
+  }
+  
+  func resetToDefaults() {
+    lowBatteryThreshold = 10
+    highBatteryThreshold = 85
   }
   
   func updateBatteryLevel() {
@@ -141,6 +149,10 @@ struct MenuContent: View {
           set: { batteryMonitor.highBatteryThreshold = Int($0) }
         ), in: 51...100, step: 1)
         Text("\(batteryMonitor.highBatteryThreshold)%")
+      }
+      
+      Button("Reset to Defaults") {
+        batteryMonitor.resetToDefaults()
       }
       
       Divider()
